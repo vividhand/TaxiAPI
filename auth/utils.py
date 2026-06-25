@@ -11,12 +11,12 @@ ACCESS_TOKEN_TYPE = "access_token"
 REFRESH_TOKEN_TYPE = "refresh_token"
 
 
-def jwt_encode(expire_timedelta: datetime, payload: dict, private_key: str = jwt_schem.private_key.read_text(), algorithm_: str = jwt_schem.algorithm):
+def jwt_encode(expire_time: datetime, payload: dict, private_key: str = jwt_schem.private_key.read_text(), algorithm_: str = jwt_schem.algorithm):
     to_encode = payload.copy()
     now = datetime.now(UTC)
 
 
-    to_encode.update(exp=expire_timedelta, iat=now)
+    to_encode.update(exp=expire_time, iat=now)
     encoded = jwt.encode(payload=to_encode, key=private_key, algorithm=algorithm_)
     return encoded
 
@@ -61,21 +61,21 @@ shema = PasswordValidator()\
 def password_validate(password: str):
      return shema.validate(password)
 
-def create_token(payload: dict, type: str) -> str:
-    jwt_payload = {"type": type}
+def create_token(payload: dict, token_type: str) -> str:
+    jwt_payload = {"type": token_type}
     jwt_payload.update(payload)
-    if type == ACCESS_TOKEN_TYPE:
-        expire = datetime.now(UTC) + timedelta(minutes=60)
-    elif type == REFRESH_TOKEN_TYPE:
-        expire = datetime.now(UTC) + timedelta(days=7)
-    return jwt_encode(jwt_payload, expire_timedelta= expire)
+    if token_type == ACCESS_TOKEN_TYPE:
+        expire = datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    elif token_type == REFRESH_TOKEN_TYPE:
+        expire = datetime.now(UTC) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    return jwt_encode(payload= jwt_payload, expire_time= expire)
 
 def create_access_token(payload: dict):
-    access_token = create_access_token(type = ACCESS_TOKEN_TYPE, payload=payload)
+    access_token = create_token(token_type = ACCESS_TOKEN_TYPE, payload=payload)
     return access_token
 
 def create_refresh_token(payload: dict):
-    refresh_token = create_access_token(type=REFRESH_TOKEN_TYPE, payload=payload)
+    refresh_token = create_token(token_type=REFRESH_TOKEN_TYPE, payload=payload)
     return refresh_token
 
 

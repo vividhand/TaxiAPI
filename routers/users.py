@@ -109,28 +109,26 @@ def resend_code(email: str, back_task: BackgroundTasks, user_connect: UserReposi
 
 
 @rt.post("/login", summary="Sign on")
-def login_user(user: UserResponseSchema = Depends(verify_auth_user), driver_connect: DriverRepositories = Depends(get_driver_repositories)):
-    userdata = user[0]
-    res = driver_connect.select_driver_status_by_id(driver_id=userdata["id"])
-    if res[0]:
-        jwt_payload = {
-            "sub": userdata["fullname"],
-            "fullname": userdata["fullname"],
-            "email": userdata["email"],
-            "is_admin": userdata["is_admin"],
-            "driver_status": res[1][0]
-        }
-    else:
-        jwt_payload = {
-            "sub": userdata["fullname"],
-            "fullname": userdata["fullname"],
-            "email": userdata["email"],
-            "is_admin": userdata["is_admin"],
+def login_user(user = Depends(verify_auth_user), refresh_conn: RefreshTokensRepositories = Depends(get_refresh_tokens_repositories)):
+    user_payload = {
+        "sub": user[0]["id"],
+        "is_verified": user[0]["is_verified"]
     }
-    token = jwt_encode(jwt_payload)
-    return {"Message": f"User {userdata["fullname"]} is logged in",
-            "access_token": token,
-            "token_type": "Bearer"}
+    print(user_payload)
+    res = refresh_conn.delete_token_data_by_user_id(user_id=user[0]["id"])
+    if res[0]:
+        access_token = create_access_token(payload=user_payload)
+        refresh_token = create_refresh_token(payload=user_payload)
+
+        refresh_conn.add_refresh_token(user_id=user[0]["id"], token_hash=hash_token(access_token),
+                                       expires_at=(datetime.now(UTC) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)))
+
+        return {"Message": f"User {user[0]["fullname"]} is logged in",
+                "access_token": access_token,
+                "refresh_token": refresh_token,
+                "token_type": "Bearer"}
+    print(f"\n\n\n{res[1]}\n\n\n")
+    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Server error")
 
 @rt.get("/search-free-driver", summary="Find a free driver")
 def search_driver():
