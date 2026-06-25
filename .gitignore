@@ -13,3 +13,6 @@
 #bytecode
 __pycache__/
 *.pyc
+
+#jwt key
+*.pem
