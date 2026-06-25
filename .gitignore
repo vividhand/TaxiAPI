@@ -1,0 +1,15 @@
+#venv
+.venv/
+
+#certs
+.certs/
+
+#env
+.env
+
+#IDE
+.idea/
+
+#bytecode
+__pycache__/
+*.pyc
