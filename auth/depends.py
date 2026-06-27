@@ -12,6 +12,7 @@ from repositories.verification import EmailVerifyRepositories, OrderVerifyReposi
 from repositories.order import OrderRepositories
 from schemas.refresh_token import RefreshRequestSchemas
 http_bearer = HTTPBearer()
+from schemas.users import UserSchema
 
 
 def get_token(cred: HTTPAuthorizationCredentials = Depends(http_bearer)):
@@ -30,20 +31,6 @@ def verify_authorization(data = Depends(get_user_data)):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Email is not verified")
     return True
 
-
-def verify_auth_user(email: str = Form(), password: str = Form()):
-    unauthed_exc = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
-    conn = UserRepositories()
-    res = conn.select_user(email=email)
-    if res[0]:
-        if verify_password(password, res[1][0]["password"]):
-            return res[1]
-        else:
-            raise unauthed_exc
-    elif not (res[0]) and res[1] == "Invalid email or password":
-        raise unauthed_exc
-    else:
-        raise unauthed_exc
 
 def get_admin_repositories():
     return AdminsRepositories()
@@ -65,3 +52,22 @@ def get_refresh_tokens_repositories():
 
 def get_refresh_token(body: RefreshRequestSchemas):
     return body.refresh_token
+
+def verify_auth_user(email: str = Form(), password: str = Form(), user_conn: UserRepositories = Depends(get_user_repositories)):
+    unauthed_exc = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+    result = user_conn.select_user_by_email(email=email)
+    if result[0]:
+        user_data = result[1]
+        if verify_password(password, user_data.password):
+            return UserSchema.model_validate(user_data).model_dump()
+        else:
+            raise unauthed_exc
+    else:
+        raise unauthed_exc
+
+def get_admin_status(payload: dict = Depends(get_user_data), user_conn: UserRepositories = Depends(get_user_repositories)):
+    user = user_conn.select_user_by_email(email=payload.get("email"))
+    user_data = user[1]
+    is_admin = user_data.is_admin
+    if not is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only admins")

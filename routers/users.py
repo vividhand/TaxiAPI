@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, status, Depends, BackgroundTasks
 from repositories.user import UserRepositories
-from schemas.new_user import UserSchema, UserResponseSchema
+from schemas.users import NewUserSchema
 from auth.utils import (hash_password, email_validate, password_validate, jwt_encode, jwt_decode,
                         create_access_token, create_refresh_token, hash_token, REFRESH_TOKEN_EXPIRE_DAYS, verify_token)
 from auth.depends import (get_token, verify_auth_user, get_user_id, get_user_repositories,
-                          get_order_ver_repositories, get_email_ver_repositories, get_refresh_tokens_repositories, get_refresh_token, get_driver_repositories)
+                          get_email_ver_repositories, get_refresh_tokens_repositories, get_refresh_token, get_driver_repositories)
 from services.send_email import send_email_to_verify, send_email_to_driver
 from services.verify_email import verify_email
 import secrets
@@ -20,7 +20,7 @@ rt = APIRouter(prefix="/taxi_api/users", tags=["User"])
 http_bearer = HTTPBearer()
 
 @rt.post("/register", summary="Sign up")
-def register_user(user: UserSchema, back_task: BackgroundTasks, user_connect: UserRepositories = Depends(get_user_repositories)):
+def register_user(user: NewUserSchema, back_task: BackgroundTasks, user_connect: UserRepositories = Depends(get_user_repositories)):
     checked_email = email_validate(user.email)
     checked_password = password_validate(user.password)
     if not checked_email:
@@ -46,21 +46,20 @@ def verify_user(token: str, code: int, user_connect: UserRepositories = Depends(
                 refresh_connect: RefreshTokensRepositories = Depends(get_refresh_tokens_repositories)):
     if verify_email(token=token, input_code=code):
         user = user_connect.select_user_by_verification_token(token=token)
-
+        user_data = user[1]
         expires_at = verify_connect.select_expired_time(token=token)
         if datetime.now(UTC) < expires_at:
             verify_connect.update_status(token=token)
-            print(f"User data: {user}")
             access_payload = {
-                "sub": user[1]["id"],
-                "is_verified": user[1]["is_verified"]}
+                "sub": user_data.id,
+                "is_verified": user_data.is_verified}
 
             refresh_payload = {
-                "sub": user[1]["id"]}
+                "sub": user_data.id}
 
             access_token = create_access_token(access_payload)
             refresh_token = create_refresh_token(refresh_payload)
-            refresh_connect.add_refresh_token(user_id= user[1]["id"], token_hash=hash_token(refresh_token), expires_at=(datetime.now(UTC)+timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)))
+            refresh_connect.add_refresh_token(user_id= user_data.id, token_hash=hash_token(refresh_token), expires_at=(datetime.now(UTC)+timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)))
             return {"status": 200,
                     "message": "User has been created",
                     "access_token": access_token,
@@ -80,7 +79,8 @@ def refresh_access_token(refresh_token: RefreshRequestSchemas, user_id: int = De
     token_expires_at = token_data[3]
     if token_expires_at > datetime.now(UTC):
         if verify_token(token=refresh_token.refresh_token, hashed_token=hashed_token):
-            is_verified = user_connect.select_user_by_id(id= user_id)[1][-1]
+            user = user_connect.select_user_by_id(id= user_id)[1]
+            is_verified = user.is_verified
             access_payload = {
                 "sub": user_id,
                 "is_verified": is_verified}
@@ -97,15 +97,18 @@ def refresh_access_token(refresh_token: RefreshRequestSchemas, user_id: int = De
 def resend_code(email: str, back_task: BackgroundTasks, user_connect: UserRepositories = Depends(get_user_repositories),
                 verify_email_connect: EmailVerifyRepositories = Depends(get_email_ver_repositories)):
     user = user_connect.select_user_by_email(email=email)
+    if user[0]:
+        user_data = user[1]
+        if user_data.is_verified:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Already verified")
+        verify_email_connect.deactivate_old_code(user_id= user_data.id)
+        token = secrets.token_urlsafe(32)
+        back_task.add_task(send_email_to_verify, email=user_data.email, subject="Your confirmation code. The code is valid for 5 minutes.", token=token)
 
-    if user[1].is_verified:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Already verified")
-    verify_email_connect.deactivate_old_code(user_id= user[1].id)
-    token = secrets.token_urlsafe(32)
-    back_task.add_task(send_email_to_verify, email=user[1].email, subject="Your confirmation code. The code is valid for 5 minutes.", token=token)
-
-    return {"status": 200,
-            "token": token}
+        return {"status": 200,
+                "token": token}
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid email")
 
 
 @rt.post("/login", summary="Sign on")
