@@ -4,6 +4,8 @@ from sqlalchemy import select, update,delete, Text
 from models.users import UsersOrm
 from models.verify_email import EmailVerificationOrm
 from datetime import datetime, timedelta, UTC
+from core.setting import OrderStatus
+
 class EmailVerifyRepositories:
     def __init__(self):
         self.session = Session(engine)
@@ -40,19 +42,17 @@ class EmailVerifyRepositories:
                 return expired_time
         except Exception as e:
             return [False, e]
-    def update_status(self, token: str):
-        try:
-            with self.session as sess:
-                e = aliased(EmailVerificationOrm)
-                u = aliased(UsersOrm)
-                user_id_request = select(u.id).select_from(u).join(e, e.user_id == u.id).where(e.token == token)
-                user_id = sess.execute(user_id_request).first()
-                update_request = (update(u).where(u.id == user_id[0]).values(is_verified=True))
-                sess.execute(update_request)
-                sess.commit()
-                return True
-        except Exception as e:
-            return [False, e]
+    def update_status(self, token: str) -> None:
+        with self.session as sess:
+            e = aliased(EmailVerificationOrm)
+            u = aliased(UsersOrm)
+            user_id_request = select(u.id).select_from(u).join(e, e.user_id == u.id).where(e.token == token)
+            user_id = sess.execute(user_id_request).first()[0]
+            update_users = (update(u).where(u.id == user_id).values(is_verified=True))
+            update_email = (update(e).where(e.user_id == user_id)).values(it_expired=True)
+            sess.execute(update_users)
+            sess.execute(update_email)
+            sess.commit()
     def deactivate_old_code(self, user_id: int) -> list:
         try:
             with self.session as sess:
@@ -72,74 +72,80 @@ class OrderVerifyRepositories:
     def __init__(self):
         self.session = Session(engine)
 
-    def add_code(self, driver_id: int, code: int, token: str) -> list:
+    def add_code(self, order_id: int, driver_id: int, code: int, token: str) -> bool:
         with self.session as sess:
-            try:
-                now = datetime.now(UTC)
-                new_order_ver_row = OrdersVerificationOrm(driver_id=driver_id, code=code, token=token, expired_at=(now+timedelta(minutes=5)))
-                sess.execute(new_order_ver_row)
-                sess.commit()
-                return [True, "Order verification row has been created"]
-            except Exception as e:
-                return [False, str(e)]
-    def select_code(self, order_token: str) -> list:
+            n_o_v_c = OrdersVerificationOrm(order_id= order_id, driver_id= driver_id, code= code, token= token, expires_at= ((datetime.now(UTC)) + timedelta(minutes=5)))
+            sess.add(n_o_v_c)
+            sess.commit()
+            return True
+
+    def select_code_data(self, order_token: str) -> OrdersVerificationOrm:
         with self.session as sess:
-            try:
-                o = aliased(OrdersVerificationOrm)
-                query = select(o.order_id, o.driver_id, o.code, o.token, o.expires_at, o.driver_id).select_from(o).where(o.token == order_token)
-                order_data = sess.execute(query).first()
-                if order_data:
-                    return [True, order_data]
-                return [False, "Not found"]
-            except Exception as e:
-                return [False, str(e)]
-    def verify_order(self, token: str) -> list:
+            query = select(OrdersVerificationOrm).select_from(OrdersVerificationOrm).where(OrdersVerificationOrm.token == order_token)
+            code_data = sess.execute(query).scalars().first()
+            return code_data
+
+    def deactivate_code(self, token: str):
         with self.session as sess:
-            try:
-                o = aliased(OrdersOrm)
-                o_v = aliased(OrdersVerificationOrm)
-                query_select = select(o_v.order_id).select_from(o_v).where(o_v.token==token)
-                order_id = sess.execute(query_select).first()[0]
-                if order_id:
-                    query_update = update(o).where(o.id==order_id).values(status="on_way")
-                    sess.execute(query_update)
-                    sess.commit()
-                    return [True, "Order has been verified"]
-                return [False, "Invalid token"]
-            except Exception as e:
-                return [False, str(e)]
+            update_query = update(OrdersVerificationOrm).where(OrdersVerificationOrm.token == token).values(it_expired=True)
+            sess.execute(update_query)
+            sess.commit()
+
+    def verify_order(self, token: str) -> None:
+        with self.session as sess:
+            o = aliased(OrdersOrm)
+            o_v = aliased(OrdersVerificationOrm)
+            query_select = select(o_v.order_id).select_from(o_v).where(o_v.token == token)
+            order_id = sess.execute(query_select).first()[0]
+            query_update = update(o).where(o.id==order_id).values(status=OrderStatus.on_way)
+            sess.execute(query_update)
+            sess.commit()
 
 from models.refresh_tokens import RefreshTokensOrm
 class RefreshTokensRepositories:
     def __init__(self):
         self.session = Session(engine)
 
-    def add_refresh_token(self, user_id: int, token_hash: str, expires_at: datetime) -> list:
+    def add_refresh_token(self, user_id: int, token_hash: str, expires_at: datetime, jti: str) -> tuple:
         with self.session as sess:
-            try:
-                new_ref_token = RefreshTokensOrm(user_id = user_id, token_hash=token_hash, expires_at=expires_at)
-                sess.execute(new_ref_token)
-                sess.commit()
-                return [True, "Token has been added"]
-            except Exception as e:
-                return [False, str(e)]
-    def get_token_data_by_user_id(self, user_id: int) -> list:
+            new_ref_token = RefreshTokensOrm(user_id = user_id, token_hash=token_hash, expires_at=expires_at, jti=jti)
+            sess.add(new_ref_token)
+            sess.commit()
+            return True,
+    def get_token_data_by_user_id(self, user_id: int) -> RefreshTokensOrm:
         with self.session as sess:
-            try:
-                r = aliased(RefreshTokensOrm)
-                query = select(r.id, r.user_id, r.token_hash, r.expires_at, r.is_revoked).select_from(r).where(r.user_id == user_id, r.is_revoked.is_(False))
-                data = sess.execute(query).mappings().first()
-                return [True, data]
-            except Exception as e:
-                return [False, str(e)]
+            r = aliased(RefreshTokensOrm)
+            query = select(r).select_from(r).where((r.user_id == user_id) & (r.is_revoked.is_(False)))
+            data = sess.execute(query).scalars().first()
+            return data
 
-    def delete_token_data_by_user_id(self, user_id: int) -> list:
+
+    def delete_token_data_by_user_id(self, user_id: int):
         with self.session as sess:
-            try:
-                r = aliased(RefreshTokensOrm)
-                query = delete(r).where(r.user_id == user_id)
-                sess.execute(query)
-                sess.commit()
-                return [True, "Token data has been deleted"]
-            except Exception as e:
-                return [False, str(e)]
+            query = delete(RefreshTokensOrm).where(RefreshTokensOrm.user_id == user_id)
+            sess.execute(query)
+            sess.commit()
+
+
+    def get_token_data_by_jti(self, jti: str) -> RefreshTokensOrm:
+        with self.session as sess:
+            r = aliased(RefreshTokensOrm)
+            query = select(r).select_from(r).where((r.jti == jti) & (r.is_revoked.is_(False)))
+            data = sess.execute(query).scalars().first()
+            return data
+
+
+    def delete_token_data_by_jti(self, jti: str):
+        with self.session as sess:
+            query = delete(RefreshTokensOrm).where(RefreshTokensOrm.jti == jti)
+            sess.execute(query)
+            sess.commit()
+
+    def revoke_token(self, jti: str):
+        with self.session as sess:
+            query = update(RefreshTokensOrm).where(RefreshTokensOrm.jti == jti).values(is_revoked = True)
+            sess.execute(query)
+            sess.commit()
+
+# token__ = RefreshTokensRepositories()
+# print(token__.get_token_data_by_user_id(user_id=8).token_hash)

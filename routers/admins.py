@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, status
-from schemas.new_driver import DriverSchema
+from schemas.drivers import DriverSchema
 from repositories.admin import AdminsRepositories
 from auth.depends import get_admin_status, get_admin_repositories
 rt = APIRouter(prefix="/taxi_api/admins", tags=["Admins"])

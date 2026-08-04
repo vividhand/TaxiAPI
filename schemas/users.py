@@ -10,7 +10,6 @@ class UserSchema(BaseModel):
     id: int
     fullname: str
     email: str
-    password: str
     registration_date: datetime.datetime
     is_admin: bool
     is_verified: bool

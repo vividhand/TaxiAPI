@@ -29,7 +29,7 @@ class DriverStatus(enum.Enum):
     active = "active"
     banned = "banned"
 
-class Rate(enum.Enum):
+class Rate(int, enum.Enum):
     one = 1
     two = 2
     three = 3

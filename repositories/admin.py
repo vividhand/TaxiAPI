@@ -19,7 +19,7 @@ class AdminsRepositories:
                 return True, "Driver has been added"
             return False, None
 
-    def ban_driver(self, fullname: str, email: str) -> tuple[bool, Optional[str, None]]:
+    def ban_driver(self, fullname: str, email: str) -> Optional[bool]:
         with self.session as sess:
             query_user_id = (select(UsersOrm.id).select_from(UsersOrm).where((UsersOrm.fullname==fullname) & (UsersOrm.email == email)))
             user_id = sess.execute(query_user_id).first()
@@ -27,11 +27,10 @@ class AdminsRepositories:
                 query = (update(DriverOrm).where(DriverOrm.id == user_id).values(status=DriverStatus.banned))
                 sess.execute(query)
                 sess.commit()
-                return True, None
-            else:
-                return False, "Driver not found"
+                return True
+            return False
 
-    def unban_driver(self, fullname: str, email: str) -> tuple[bool, Optional[str, None]]:
+    def unban_driver(self, fullname: str, email: str) -> Optional[bool]:
         with self.session as sess:
             query_user_id = (select(UsersOrm.id).select_from(UsersOrm).where((UsersOrm.fullname==fullname) & (UsersOrm.email == email)))
             user_id = sess.execute(query_user_id).first()
@@ -39,8 +38,7 @@ class AdminsRepositories:
                 query = (update(DriverOrm).where(DriverOrm.id == user_id).values(status=DriverStatus.active))
                 sess.execute(query)
                 sess.commit()
-                return True, None
-            else:
-                return False, "Driver not found"
+                return True
+            return False
 
 

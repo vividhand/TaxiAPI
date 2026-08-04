@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from core.setting import Rate
 from repositories.reviews import ReviewsRepositories
-from schemas.new_review import ReviewSchema
+from schemas.reviews import ReviewSchema
 rt = APIRouter()
 
 @rt.post("/taxi_api/reviews/add")

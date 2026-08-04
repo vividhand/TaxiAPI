@@ -4,22 +4,19 @@ from dotenv import load_dotenv
 import aiosmtplib
 from pathlib import Path
 import random
-from repositories.verification import OrderVerifyRepositories
 import secrets
-from repositories.driver import DriverRepositories
-from repositories.verification import EmailVerifyRepositories
+from repositories import DriverRepositories, EmailVerifyRepositories, OrderVerifyRepositories
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / "Core" / ".env")
 
 
 def get_driver_id(email: str):
-    conn = DriverRepositories()
-    driver_data = conn.select_driver_data_by_email(driver_email=email)
-    if driver_data[0]:
-        return driver_data[1][0]
-    return driver_data[1]
-async def send_email_to_driver(email: str, user_fullname: str, location: str):
-    order_code= random.randint(100000, 999999)
+    driver_connect = DriverRepositories()
+    driver_data = driver_connect.select_driver_data_by_email(driver_email=email)
+    return driver_data
+
+async def send_email_to_driver(order_id: int, email: str, user_fullname: str, location: str):
+    order_code = random.randint(100000, 999999)
     token = secrets.token_urlsafe(32)
     message = EmailMessage()
     message["From"] = "Taxi API <noreply@taxiapi.local>"
@@ -29,13 +26,13 @@ async def send_email_to_driver(email: str, user_fullname: str, location: str):
                         f"Confirm your order on the website! Order code: {order_code}. Order token: {token}. Or click on this link:"
                         f"http://127.0.0.1:200/verify_order?order_token={token}&code={order_code}"
                         f"")
-    driver_id = get_driver_id(email=email)
+    driver_id = get_driver_id(email=email).id
     if driver_id == "Not found":
         return False
 
 
     conn_to_verify_order = OrderVerifyRepositories()
-    conn_to_verify_order.add_code(driver_id=driver_id, code=order_code, token=token)
+    conn_to_verify_order.add_code(order_id= order_id, driver_id=driver_id, code=order_code, token=token)
 
     result = await aiosmtplib.send(
         message,

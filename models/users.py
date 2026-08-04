@@ -15,4 +15,3 @@ class UsersOrm(Base):
     is_admin: Mapped[bool] = mapped_column(server_default=text("False"))
     is_verified: Mapped[bool] = mapped_column(server_default=text("False"))
 
-Base.metadata.create_all(engine)

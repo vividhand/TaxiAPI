@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from core.setting import Base, id_type, DriverStatus
 from sqlalchemy import ForeignKey, text
 
