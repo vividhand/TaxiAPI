@@ -62,8 +62,8 @@ def verify_auth_user(email: str = Form(), password: str = Form(), user_conn: Use
         return result
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
 
-def get_admin_status(payload: dict = Depends(get_user_data), user_conn: UserRepositories = Depends(get_user_repositories)):
-    user_data = user_conn.select_user_by_email(email=payload.get("email"))
+def get_admin_status(user_id: str = Depends(get_user_id), user_conn: UserRepositories = Depends(get_user_repositories)):
+    user_data = user_conn.select_user_by_id(int(user_id))
     if user_data is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
     is_admin = user_data.is_admin
