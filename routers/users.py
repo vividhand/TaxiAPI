@@ -12,11 +12,10 @@ http_bearer = HTTPBearer()
 
 
 @rt.get("/get_free_driver", summary="Get a free driver")
-def get_free_driver(driver_connect: DriverRepositories = Depends(get_driver_repositories), reviews_conn: ReviewsRepositories = Depends(get_reviews_repositories)):
+def get_free_driver(_: int = Depends(get_user_id), driver_connect: DriverRepositories = Depends(get_driver_repositories), reviews_conn: ReviewsRepositories = Depends(get_reviews_repositories)):
     free_drivers = driver_connect.select_free_driver()
     if free_drivers is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="The list of drivers is empty")
-
     response_data = []
     for driver in free_drivers:
         driver_data= {"driver_id": driver.get("id"),
