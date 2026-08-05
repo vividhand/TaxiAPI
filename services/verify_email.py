@@ -2,8 +2,9 @@ from repositories.verification import EmailVerifyRepositories
 
 def verify_email(token: str, input_code: int):
     conn = EmailVerifyRepositories()
-    code = conn.select_verify_code(token=token)
-    if code[0] == input_code:
-        return True
-    else:
+    code_data = conn.get_code_data_by_token(token=token)
+    if code_data is None:
         return False
+    if code_data.code == input_code:
+        return True
+    return False

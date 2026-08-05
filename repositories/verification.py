@@ -24,15 +24,12 @@ class EmailVerifyRepositories:
         except Exception as e:
             sess.rollback()
             return [False, e]
-    def select_verify_code(self, token):
-        try:
-            with self.session as sess:
-                e = aliased(EmailVerificationOrm)
-                request = select(e.code).select_from(e).where(e.token == token)
-                code = sess.execute(request).first()
-                return code
-        except Exception as e:
-            return [False, e]
+
+    def get_code_data_by_token(self, token):
+        with self.session as sess:
+            request = select(EmailVerificationOrm).where(EmailVerificationOrm.token == token)
+            code = sess.execute(request).scalars().first()
+            return code
 
     def select_expired_time(self, token):
         try:
@@ -146,6 +143,3 @@ class RefreshTokensRepositories:
             query = update(RefreshTokensOrm).where(RefreshTokensOrm.jti == jti).values(is_revoked = True)
             sess.execute(query)
             sess.commit()
-
-# token__ = RefreshTokensRepositories()
-# print(token__.get_token_data_by_user_id(user_id=8).token_hash)
