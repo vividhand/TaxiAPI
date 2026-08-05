@@ -46,7 +46,3 @@ class DriverRepositories:
             query = select(UsersOrm).select_from(UsersOrm).join(DriverOrm, DriverOrm.id == UsersOrm.id).where(UsersOrm.email == driver_email)
             result = sess.execute(query).scalars().first()
             return result
-
-
-
-

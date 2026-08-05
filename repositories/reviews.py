@@ -41,8 +41,3 @@ class ReviewsRepositories:
             avg_rate = sess.execute(query).scalar()
             return avg_rate
 
-
-# rrt = ReviewsRepositories()
-# print(rrt.get_reviews_by_user_id(3).text)
-# print(rrt.get_reviews_by_driver_id(4).rate)
-# print(rrt.get_reviews_by_order_id(1).date)

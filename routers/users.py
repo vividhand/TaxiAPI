@@ -3,7 +3,7 @@ from auth.depends import (get_user_id, get_user_repositories,
                           get_driver_repositories, get_order_repositories, get_reviews_repositories)
 from fastapi.security import HTTPBearer
 from services import send_email_to_driver, verify_order
-from schemas import NewOrderSchema, UserSchema
+from schemas import NewOrderSchema, UserSchema, DriverResponseSchema
 from repositories import OrderRepositories, DriverRepositories, UserRepositories, ReviewsRepositories
 from core.setting import Rate
 
@@ -11,16 +11,23 @@ rt = APIRouter(prefix="/users", tags=["User"])
 http_bearer = HTTPBearer()
 
 
-@rt.get("/search-free-driver", summary="Find a free driver")
-def search_driver(driver_connect: DriverRepositories = Depends(get_driver_repositories), reviews_conn: ReviewsRepositories = Depends(get_reviews_repositories)):
+@rt.get("/get_free_driver", summary="Get a free driver")
+def get_free_driver(driver_connect: DriverRepositories = Depends(get_driver_repositories), reviews_conn: ReviewsRepositories = Depends(get_reviews_repositories)):
     free_drivers = driver_connect.select_free_driver()
     if free_drivers is None:
-        return {"Drivers": "Not Found"}
-    return free_drivers
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="The list of drivers is empty")
 
-@rt.get("/average-rate_driver")
-def get_avg_rate(driver_id: int, review_conn: None):
-    pass
+    response_data = []
+    for driver in free_drivers:
+        driver_data= {"driver_id": driver.get("id"),
+                      "driver_fullname": driver.get("fullname"),
+                      "driver_email": driver.get("email"),
+                      "driver_rate": reviews_conn.get_average_driver_rate(driver.get("id")),
+                      "driver_status": driver.get("status"),
+                      "driver_registration_date": driver.get("registration_date")}
+        response_data.append(driver_data)
+    return response_data
+
 
 @rt.get("/me")
 def get_me(user_id: int = Depends(get_user_id), user_conn: UserRepositories = Depends(get_user_repositories)):
