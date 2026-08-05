@@ -11,7 +11,7 @@ rt = APIRouter(prefix="/users", tags=["User"])
 http_bearer = HTTPBearer()
 
 
-@rt.get("/get_free_driver", summary="Get a free driver")
+@rt.get("/get-free-driver", summary="Get a free driver")
 def get_free_driver(_: int = Depends(get_user_id), driver_connect: DriverRepositories = Depends(get_driver_repositories), reviews_conn: ReviewsRepositories = Depends(get_reviews_repositories)):
     free_drivers = driver_connect.select_free_driver()
     if free_drivers is None:
