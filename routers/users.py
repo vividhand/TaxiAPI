@@ -53,15 +53,17 @@ def create_order(order: NewOrderSchema, back_task: BackgroundTasks, user_id = De
 
 
 @rt.post("/add-review")
-def add_review(driver_fullname: str, order_id: int, text: str, user_id: int = Depends(get_user_id), rate: Rate = 1,
+def add_review(driver_email: str, order_id: int, text: str, user_id: int = Depends(get_user_id), rate: Rate = 1,
                review_conn: ReviewsRepositories = Depends(get_reviews_repositories),
                driver_conn: DriverRepositories = Depends(get_driver_repositories)):
-    driver_data = driver_conn.select_driver_by_fullname(driver_fullname=driver_fullname)
-    if verify_order(order_id=order_id, driver_id=driver_data.id, user_id=user_id):
+    driver_data = driver_conn.select_driver_data_by_email(driver_email=driver_email)
+    if verify_order(order_id=order_id, driver_id=driver_data.id, user_id=int(user_id)):
+        if not (review_conn.get_reviews_by_order_id(order_id=order_id) is None):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Review already exists")
         review_conn.add_review(user_id=user_id, driver_id=driver_data.id, order_id=order_id, rate=rate, text=text)
         return {"message": "Ok",
                 "detail": "Review has been added"}
-    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Order id or driver email is invalid")
 
 @rt.get("/my-reviews")
 def get_reviews(user_id_: int = Depends(get_user_id), reviews_conn: ReviewsRepositories = Depends(get_reviews_repositories)):

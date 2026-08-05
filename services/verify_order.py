@@ -8,10 +8,7 @@ def verify_order(order_id: int, driver_id: int, user_id: int) -> bool:
     if order is None:
         return False
     user_id_or, driver_id_or = order.user_id, order.driver_id
-    if (user_id_or == user_id) and (driver_id_or == driver_id) and (order.status == OrderStatus.completed) and ((datetime.now(UTC) - order.completed_at) < timedelta(hours=72)):
+    if (user_id_or == user_id) and (driver_id_or == driver_id) and (order.status == OrderStatus.completed) and ((datetime.now(UTC) - order.completed_at.replace(tzinfo=UTC)) < timedelta(hours=72)):
         return True
     return False
-#
-# print(verify_order(2, 4, 3))
-
 
