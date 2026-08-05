@@ -13,6 +13,9 @@ class AdminsRepositories:
             user_id = sess.execute(user_id_request).scalar_one_or_none()
             if user_id is None:
                 return False
+            driver = sess.execute(select(DriverOrm.id).where(DriverOrm.id == user_id)).scalar_one_or_none()
+            if not (driver is None):
+                return False
             new_driver = DriverOrm(id=user_id)
             sess.add(new_driver)
             sess.commit()
@@ -24,6 +27,9 @@ class AdminsRepositories:
             user_id = sess.execute(user_id_request).scalar_one_or_none()
             if user_id is None:
                 return False
+            driver = sess.execute(select(DriverOrm.id).where(DriverOrm.id == user_id)).scalar_one_or_none()
+            if not (driver is None):
+                return False
             ban_request = (update(DriverOrm).where(DriverOrm.id == user_id).values(status=DriverStatus.banned))
             sess.execute(ban_request)
             sess.commit()
@@ -34,6 +40,9 @@ class AdminsRepositories:
             user_id_request = select(UsersOrm.id).where(UsersOrm.email == email)
             user_id = sess.execute(user_id_request).scalar_one_or_none()
             if user_id is None:
+                return False
+            driver = sess.execute(select(DriverOrm.id).where(DriverOrm.id == user_id)).scalar_one_or_none()
+            if not (driver is None):
                 return False
             unban_request = (update(DriverOrm).where(DriverOrm.id == user_id).values(status=DriverStatus.active))
             sess.execute(unban_request)
