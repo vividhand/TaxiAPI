@@ -14,6 +14,6 @@ class OrdersOrm(Base):
     driver_id: Mapped[int] = mapped_column(ForeignKey("drivers.id"))
     location: Mapped[str]
     date: Mapped[datetime.datetime] = mapped_column(server_default=text("timezone('utc', now())"))
-    completed_at: Mapped[datetime.datetime] = mapped_column(server_default=text("Null"))
+    completed_at: Mapped[datetime.datetime] = mapped_column(server_default=text("Null"), nullable=True)
     status: Mapped[OrderStatus] = mapped_column(default=OrderStatus.waiting)
 
