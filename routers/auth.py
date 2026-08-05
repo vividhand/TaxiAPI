@@ -44,6 +44,9 @@ def verify_user(token: str, code: int, response: Response, user_connect: UserRep
     if user_data is None:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid verification code or token")
 
+    if user_data.is_verified:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already verified")
+
     expires_at = verify_connect.select_expired_time(token=token)
     if datetime.now(UTC) > expires_at:
         raise HTTPException(status_code=status.HTTP_410_GONE, detail="Verification code has expired")
