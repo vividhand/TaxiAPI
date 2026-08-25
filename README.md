@@ -2,7 +2,7 @@
 
 REST API для сервиса такси, написанный на FastAPI  
 ----------------------------------------------------
-## Возможности:
+## Возможности
 - Пользователь:
   - Поиск свободных активных водителей
   - Получение информации о своём профиле
@@ -27,3 +27,6 @@ REST API для сервиса такси, написанный на FastAPI
    - 
 
 ----------------------------------------------------
+### Технологии  
+[Язык програмирования _Python_](https://www.python.org/ "Официальный сайт python с инструкцией по установке, документацией, новыми релизами, сообществом")
+<img alt="Python" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1280px-Python-logo-notext.svg.png?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=thumbnail" width="150" height="150"/>
