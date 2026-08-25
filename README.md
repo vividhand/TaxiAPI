@@ -29,4 +29,4 @@ REST API для сервиса такси, написанный на FastAPI
 [Язык програмирования - _Python_](https://www.python.org/ "Официальный сайт python с инструкцией по установке, документацией, новыми релизами и сообществом")  
 <img alt="Python" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1280px-Python-logo-notext.svg.png?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=thumbnail" width="30" height="30"/>  
 [Система управления базой данных - _PostgreSQL_](https://www.postgresql.org/ "Официальный сайт postgresql с инструкцией по установке, документацией и сообществом")  
-<img alt="PostgreSQL" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/250px-Postgresql_elephant.svg.png?utm_source=en.wikipedia.org&utm_campaign=parser&utm_content=thumbnail" width="150" height="150"/>
+<img alt="PostgreSQL" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/250px-Postgresql_elephant.svg.png?utm_source=en.wikipedia.org&utm_campaign=parser&utm_content=thumbnail" width="30" height="30"/>
