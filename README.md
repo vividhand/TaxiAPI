@@ -34,3 +34,5 @@ REST API для сервиса такси, разпработанный спом
 <img alt="SQLAlchemy" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjigSp6PYwwdfWb42MsT5LmWy4kyfBJYZCVXZNlenpCA&s=10" width="60" height="30"/>  
 [JSON Web Tokens](https://www.jwt.io/)  
 <img alt="JWT" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2DRF3Tz-_FhNH9B2bYdAAwvrYo_EZ-k1wo5Oc4zR_5W5NEy-Few8ixmk&s=10" width="60" height="30"/>  
+[Pydantic](https://avatars.githubusercontent.com/u/110818415?s=200&v=4)  
+<img alt="Pydantic" src="https://avatars.githubusercontent.com/u/110818415?s=200&v=4" width="30" height="30"/>
