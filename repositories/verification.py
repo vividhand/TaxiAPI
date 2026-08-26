@@ -90,11 +90,10 @@ class OrderVerifyRepositories:
 
     def verify_order(self, token: str) -> None:
         with self.session as sess:
-            o = aliased(OrdersOrm)
-            o_v = aliased(OrdersVerificationOrm)
-            query_select = select(o_v.order_id).select_from(o_v).where(o_v.token == token)
-            order_id = sess.execute(query_select).first()[0]
-            query_update = update(o).where(o.id==order_id).values(status=OrderStatus.on_way)
+            query_select = select(OrdersVerificationOrm.order_id).where(OrdersVerificationOrm.token == token)
+            order_id = sess.execute(query_select).scalar_one_or_none()
+            print(order_id)
+            query_update = update(OrdersOrm).where(OrdersOrm.id==order_id).values(status=OrderStatus.on_way)
             sess.execute(query_update)
             sess.commit()
 

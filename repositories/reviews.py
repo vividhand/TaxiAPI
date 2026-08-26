@@ -1,5 +1,5 @@
 from core.setting import engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 from sqlalchemy import delete, select, func
 from models import ReviewsOrm
 
@@ -19,14 +19,16 @@ class ReviewsRepositories:
             sess.commit()
     def get_reviews_by_user_id(self, user_id: int):
         with self.session as sess:
-            select_review = select(ReviewsOrm).where(ReviewsOrm.user_id == user_id)
-            reviews = sess.execute(select_review).scalars().first()
+            r = aliased(ReviewsOrm)
+            select_review = select(r.id, r.order_id, r.driver_id, r.user_id, r.rate, r.text, r.date).where(r.user_id == user_id)
+            reviews = sess.execute(select_review).mappings().all()
             return reviews
 
     def get_reviews_by_driver_id(self, driver_id: int):
         with self.session as sess:
-            select_review = select(ReviewsOrm).where(ReviewsOrm.driver_id == driver_id)
-            reviews = sess.execute(select_review).scalars().first()
+            r = aliased(ReviewsOrm)
+            select_review = select(r.id, r.order_id, r.driver_id, r.user_id, r.rate, r.text, r.date).where(r.driver_id == driver_id)
+            reviews = sess.execute(select_review).mappings().all()
             return reviews
 
     def get_reviews_by_order_id(self, order_id: int):

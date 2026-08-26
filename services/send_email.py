@@ -5,6 +5,8 @@ import aiosmtplib
 from pathlib import Path
 import random
 import secrets
+from fastapi import HTTPException, status
+
 from repositories import DriverRepositories, EmailVerifyRepositories, OrderVerifyRepositories
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / "Core" / ".env")
@@ -23,16 +25,18 @@ async def send_email_to_driver(order_id: int, email: str, user_fullname: str, lo
     message["To"] = email
 
     message.set_content(f"New order with passenger: {user_fullname}. Location: {location}."
-                        f"Confirm your order on the website! Order code: {order_code}. Order token: {token}. Or click on this link:"
+                        f"Confirm your order on the website! Order code: {order_code}. Order token: {token}. Or click on this link:\n"
                         f"http://127.0.0.1:200/verify_order?order_token={token}&code={order_code}"
                         f"")
     driver_id = get_driver_id(email=email).id
-    if driver_id == "Not found":
-        return False
+    if driver_id is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Driver not found")
+
+
 
 
     conn_to_verify_order = OrderVerifyRepositories()
-    conn_to_verify_order.add_code(order_id= order_id, driver_id=driver_id, code=order_code, token=token)
+    conn_to_verify_order.add_code(order_id=order_id, driver_id=driver_id, code=order_code, token=token)
 
     result = await aiosmtplib.send(
         message,
