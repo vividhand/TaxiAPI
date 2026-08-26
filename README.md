@@ -57,7 +57,7 @@ TaxiAPI/
 |--- schemas/
 |--- service/
 ```
-
+---------------------------------
 /api - основной запуск проекта  
 /auth - аутентификация, работа с токенами, паролями и зависимости FastAPI
 /core - подключение к СУБД и `enum.Enum` классы  
@@ -67,7 +67,7 @@ TaxiAPI/
 /schemas - pydantic схемы  
 /service - бизнес логика проекта  
 ----------------------------
-###  Пример TaxiAPI\core\.env файла
+###  Пример TaxiAPI/core/.env файла
 ```python
 DB_USER=username
 DB_PASSWORD=password
