@@ -1,32 +1,32 @@
 # TaxiAPI
 
-REST API для сервиса такси, разпработанный спомощью FastAPI  
+REST API для сервиса такси, разработанный с помощью FastAPI  
 ----------------------------------------------------
 ## Возможности
 - Пользователь:
   - Поиск свободных активных водителей
   - Получение информации о своём профиле
-  - Создание поездки на указаный адресс
+  - Создание поездки на указанный адрес
   - Добавление отзывов и оценок водителю к прошедшим заказам
   - Просмотр своих написанных ранее отзывов
 - Водитель:
   - Подтверждение поездки
   - Получение активной поездки
   - Завершение поездки
-  - Просморт своих отзывов и оценки
+  - Просмотр своих отзывов и оценки
 - Администратор:
   - Добавление новых водителей
   - Блокировка водителей
-  - Разблокрировка водителей
+  - Разблокировка водителей
 - Авторизация:
    - Регистрация новых пользователей
    - Верификация пользователя
-   - Повторное отправление кода верификации
+   - Повторная отправка кода верификации
    - Обновление access token спомощью refresh token
    - Авторизация пользователей  
 ----------------------------------------------------
 ### Технологии  
-[Язык програмирования - _Python_](https://www.python.org/ "Официальный сайт python с инструкцией по установке, документацией, новыми релизами и сообществом")  
+[Язык программирования - _Python_](https://www.python.org/ "Официальный сайт python с инструкцией по установке, документацией, новыми релизами и сообществом")  
 <img alt="Python" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1280px-Python-logo-notext.svg.png?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=thumbnail" width="30" height="30"/>  
 [Система управления базой данных - _PostgreSQL_](https://www.postgresql.org/ "Официальный сайт postgresql с инструкцией по установке, документацией и сообществом")  
 <img alt="PostgreSQL" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/250px-Postgresql_elephant.svg.png?utm_source=en.wikipedia.org&utm_campaign=parser&utm_content=thumbnail" width="30" height="30"/>  
@@ -39,10 +39,9 @@ REST API для сервиса такси, разпработанный спом
 
 Другие библиотеки и технологии:  
 - _aiosmtplib_
-- _brypt_
-- _hashlib_
+- _bcrypt_
 - _password\_validator_
-- _email\_valdiator_  
+- _email\_validator_  
 
 -----------------------------------
 ### Структура проекта
@@ -60,10 +59,10 @@ TaxiAPI/
 ```
 
 /api - основной запуск проекта  
-/auth - утилиты дял выпуска и верификации токенов и паролей. Зависимости FastAPI  
+/auth - аутентификация, работа с токенами, паролями и зависимости FastAPI
 /core - подключение к СУБД и `enum.Enum` классы  
 /models - orm модели  
-/repositories - ООП общения с базой данных  
+/repositories - классы для взаимодействия с базой данных  
 /routers - endpoints для RestAPI  
 /schemas - pydantic схемы  
 /service - бизнес логика проекта  
@@ -78,11 +77,11 @@ DB_NAME=database name
 SANDBOX_USERNAME=username
 SANDBOX_PASSWORD=password
 ```
-Переменнные DB_USER, DB_PASSWORD, DB_HOST, DB_PORT используються для установки подключения к СУБД в `core\setting.py`  
+Переменные DB_USER, DB_PASSWORD, DB_HOST, DB_PORT используеться для установки подключения к СУБД в `core\setting.py`  
 ```py
 url = f"postgresql://{os.getenv("DB_USER")}:{os.getenv("DB_PASSWORD")}@{os.getenv("DB_HOST")}/{os.getenv("DB_NAME")}"
 ```
-Переменные SANDBOX_USERNAME, SANDBOX_PASSWORD используються для имитации отправки електронных писем на платформе [mailtrap](https://mailtrap.io/) в `service\send_email.py`  
+Переменные SANDBOX_USERNAME, SANDBOX_PASSWORD используеться для имитации отправки електронных писем на платформе [mailtrap](https://mailtrap.io/) в `service\send_email.py`  
 ```python
     result = await aiosmtplib.send(
         message,
