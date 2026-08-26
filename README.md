@@ -31,6 +31,6 @@ REST API для сервиса такси, написанный на FastAPI
 [Система управления базой данных - _PostgreSQL_](https://www.postgresql.org/ "Официальный сайт postgresql с инструкцией по установке, документацией и сообществом")  
 <img alt="PostgreSQL" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/250px-Postgresql_elephant.svg.png?utm_source=en.wikipedia.org&utm_campaign=parser&utm_content=thumbnail" width="30" height="30"/>  
 [SQLAlchemy](https://www.sqlalchemy.org/)  
-<img alt="SQLAlchemy" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjigSp6PYwwdfWb42MsT5LmWy4kyfBJYZCVXZNlenpCA&s=10" width="30" height="30"/>  
+<img alt="SQLAlchemy" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjigSp6PYwwdfWb42MsT5LmWy4kyfBJYZCVXZNlenpCA&s=10" width="60" height="30"/>  
 [JSON Web Tokens](https://www.jwt.io/)  
 <img alt="JWT" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2DRF3Tz-_FhNH9B2bYdAAwvrYo_EZ-k1wo5Oc4zR_5W5NEy-Few8ixmk&s=10" width="60" height="30"/>  
