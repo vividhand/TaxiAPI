@@ -1,4 +1,5 @@
-from repositories.verification import EmailVerifyRepositories
+from repositories import EmailVerifyRepositories
+
 
 def verify_email(token: str, input_code: int):
     conn = EmailVerifyRepositories()

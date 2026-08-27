@@ -1,6 +1,6 @@
 import datetime
 from sqlalchemy.orm import Mapped, mapped_column
-from core.setting import Base, id_type, engine
+from core.setting import Base, id_type
 from sqlalchemy import String, text
 
 class UsersOrm(Base):
@@ -14,4 +14,3 @@ class UsersOrm(Base):
     registration_date: Mapped[datetime.datetime] = mapped_column(server_default=text("timezone('utc', now())"))
     is_admin: Mapped[bool] = mapped_column(server_default=text("False"))
     is_verified: Mapped[bool] = mapped_column(server_default=text("False"))
-

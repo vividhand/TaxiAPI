@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey, DateTime
 import datetime
 from sqlalchemy.orm import Mapped, mapped_column
-from core.setting import Base, id_type, engine
+from core.setting import Base, id_type
 from models.users import UsersOrm
 
 class RefreshTokensOrm(Base):

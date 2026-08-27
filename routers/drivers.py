@@ -32,7 +32,8 @@ def get_active_order(order_conn: OrderRepositories = Depends(get_order_repositor
     if role["role"] != "driver":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a driver")
     orders = order_conn.get_order_by_driver_id(driver_id=role["user_id"])
-    return orders
+    return {"message": "Active orders",
+            "data": orders}
 
 @rt.post("/complete-order")
 def complete_order(order_id: int, order_conn: OrderRepositories = Depends(get_order_repositories), role: dict = Depends(get_user_role)):
@@ -43,7 +44,7 @@ def complete_order(order_id: int, order_conn: OrderRepositories = Depends(get_or
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Order already completed")
     order_conn.update_status_order(order_id=order_id, order_status=OrderStatus.completed)
     return {"message": "Ok",
-            "detail": "Order has been completed"}
+            "data": {}}
 
 @rt.get("/my-reviews")
 def get_reviews(reviews_conn: ReviewsRepositories = Depends(get_reviews_repositories), role: dict = Depends(get_user_role)):
@@ -60,4 +61,5 @@ def get_reviews(reviews_conn: ReviewsRepositories = Depends(get_reviews_reposito
                        "text": review.get("text"),
                        "date": review.get("date")}
         response_data.append(review_data)
-    return response_data
+    return {"message": "Ok",
+            "data": response_data}

@@ -73,7 +73,6 @@ def verify_user(token: str, code: int, response: Response, user_connect: UserRep
     return {"message": "User has been verified",
             "data": {"access_token": access_token, "token_type": "bearer"}}
 
-
 @rt.post("/resend-verification-code", summary="Resend code")
 def resend_code(email: str, back_task: BackgroundTasks, user_connect: UserRepositories = Depends(get_user_repositories),
                 verify_email_connect: EmailVerifyRepositories = Depends(get_email_ver_repositories)):
@@ -88,7 +87,6 @@ def resend_code(email: str, back_task: BackgroundTasks, user_connect: UserReposi
 
     return {"message": "New verification token",
             "data": {"token": token}}
-
 
 @rt.post("/refresh", summary="Refresh access token")
 def refresh_access_token(response: Response, refresh_token: str | None = Cookie(default=None),
@@ -174,5 +172,5 @@ def login_user(response: Response, user = Depends(verify_auth_user), refresh_con
                         max_age=60*60*24*30,
                         path="/auth/refresh"
                         )
-    return {"Message": f"User {user.fullname} is logged in",
+    return {"message": f"User {user.fullname} is logged in",
             "data": {"access_token": access_token, "token_type": "Bearer"}}

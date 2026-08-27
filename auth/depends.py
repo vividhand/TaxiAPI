@@ -6,7 +6,6 @@ from repositories import (UserRepositories, AdminsRepositories, EmailVerifyRepos
                           RefreshTokensRepositories, DriverRepositories, OrderRepositories, ReviewsRepositories)
 from schemas.tokens import RefreshRequestSchemas
 
-
 http_bearer = HTTPBearer()
 
 def get_token(cred: HTTPAuthorizationCredentials = Depends(http_bearer)):
@@ -16,8 +15,7 @@ def get_user_data(token: str = Depends(get_token)):
     try:
         data = jwt_decode(token)
         return data
-    except Exception as e:
-        print(str(e))
+    except:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
 def get_user_id(data = Depends(get_user_data)):
@@ -28,6 +26,8 @@ def verify_authorization(data = Depends(get_user_data)):
         return True
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Email is not verified")
 
+def get_refresh_token(body: RefreshRequestSchemas):
+    return body.refresh_token
 
 def get_admin_repositories():
     return AdminsRepositories()
@@ -52,8 +52,6 @@ def get_refresh_tokens_repositories():
 def get_reviews_repositories():
     return ReviewsRepositories()
 
-def get_refresh_token(body: RefreshRequestSchemas):
-    return body.refresh_token
 def verify_auth_user(email: str = Form(), password: str = Form(), user_conn: UserRepositories = Depends(get_user_repositories)):
     result = user_conn.select_user_by_email(email=email)
     if result is None:

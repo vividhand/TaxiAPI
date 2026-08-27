@@ -5,21 +5,18 @@ from datetime import datetime, UTC, timedelta
 from password_validator import PasswordValidator
 from email_validator import validate_email, EmailNotValidError
 import hashlib
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
-REFRESH_TOKEN_EXPIRE_DAYS = 30
+
+ACCESS_TOKEN_EXPIRE_MINUTES = 15
+REFRESH_TOKEN_EXPIRE_DAYS = 15
 ACCESS_TOKEN_TYPE = "access_token"
 REFRESH_TOKEN_TYPE = "refresh_token"
-
 
 def jwt_encode(expire_time: datetime, payload: dict, private_key: str = jwt_schem.private_key.read_text(), algorithm_: str = jwt_schem.algorithm):
     to_encode = payload.copy()
     now = datetime.now(UTC)
-
-
     to_encode.update(exp=expire_time, iat=now)
     encoded = jwt.encode(payload=to_encode, key=private_key, algorithm=algorithm_)
     return encoded
-
 
 def jwt_decode(jwt_token: str, public_key: str = jwt_schem.public_key.read_text(),
                algorithm_: str = jwt_schem.algorithm):
@@ -32,6 +29,7 @@ def hash_password(password: str) -> str:
     hashed = bcrypt.hashpw(password_bytes, salt)
     hashed_decode = hashed.decode()
     return hashed_decode
+
 def hash_token(token: str) -> str:
     hashed_token = hashlib.sha256(token.encode()).hexdigest()
     return hashed_token
@@ -43,8 +41,6 @@ def verify_token(token: str, hashed_token: str) -> bool:
 
 def verify_password(password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(password=password.encode(), hashed_password=hashed_password.encode())
-
-
 
 def email_validate(email, chek_dns: bool = False):
     try:
@@ -78,6 +74,3 @@ def create_access_token(payload: dict):
 def create_refresh_token(payload: dict):
     refresh_token = create_token(token_type=REFRESH_TOKEN_TYPE, payload=payload)
     return refresh_token
-
-
-

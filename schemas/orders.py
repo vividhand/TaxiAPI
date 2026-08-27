@@ -2,5 +2,5 @@ from pydantic import BaseModel
 
 class NewOrderSchema(BaseModel):
 
-    driver_fullname: str
+    driver_email: str
     location: str

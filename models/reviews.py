@@ -1,7 +1,7 @@
 from datetime import datetime, UTC
 from sqlalchemy.orm import Mapped, mapped_column
-from core.setting import Base, id_type, engine, Rate
-from sqlalchemy import ForeignKey, text
+from core.setting import Base, id_type, engine
+from sqlalchemy import ForeignKey
 from models.users import UsersOrm
 from models.drivers import DriverOrm
 from models.orders import OrdersOrm
@@ -15,5 +15,3 @@ class ReviewsOrm(Base):
     rate: Mapped[int]
     text: Mapped[str]
     date: Mapped[datetime] = mapped_column(default=datetime.now(UTC))
-
-Base.metadata.create_all(engine)

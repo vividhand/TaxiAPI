@@ -1,7 +1,6 @@
 import datetime
 from sqlalchemy.orm import Mapped, mapped_column
-from core.setting import Base, id_type, OrderStatus, engine
-# Base.metadata.clear()
+from core.setting import Base, id_type, OrderStatus
 from sqlalchemy import ForeignKey, text
 from models.drivers import DriverOrm
 from models.users import UsersOrm
@@ -16,4 +15,3 @@ class OrdersOrm(Base):
     date: Mapped[datetime.datetime] = mapped_column(server_default=text("timezone('utc', now())"))
     completed_at: Mapped[datetime.datetime] = mapped_column(server_default=text("timezone('utc', null)"), nullable=True)
     status: Mapped[OrderStatus] = mapped_column(default=OrderStatus.waiting)
-

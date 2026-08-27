@@ -25,9 +25,8 @@ async def send_email_to_driver(order_id: int, email: str, user_fullname: str, lo
     message["To"] = email
 
     message.set_content(f"New order with passenger: {user_fullname}. Location: {location}."
-                        f"Confirm your order on the website! Order code: {order_code}. Order token: {token}. Or click on this link:\n"
-                        f"http://127.0.0.1:200/verify_order?order_token={token}&code={order_code}"
-                        f"")
+                        f"Confirm your order on the website! Order code: {order_code}.\n"
+                        f"Order token: {token})")
     driver_id = get_driver_id(email=email).id
     if driver_id is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Driver not found")
@@ -57,7 +56,11 @@ async def send_email_to_verify(email: str, subject: str, token: str):
 
     message.set_content(f"Your verification code: {verify_code}")
     conn = EmailVerifyRepositories()
-    conn.add_code(token=token, code=verify_code, email=email)
+    response = conn.add_code(token=token, code=verify_code, email=email)
+
+    if not response:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Email not found")
+
     result = await aiosmtplib.send(
         message,
         hostname="sandbox.smtp.mailtrap.io",

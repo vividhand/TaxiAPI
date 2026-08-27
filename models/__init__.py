@@ -1,5 +1,4 @@
 from .drivers import DriverOrm
-from .cars import CarsOrm
 from .users import UsersOrm
 from .orders import OrdersOrm
 from .reviews import ReviewsOrm
