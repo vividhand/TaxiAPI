@@ -20,17 +20,13 @@ class DriverRepositories:
 
     def select_driver_status_by_id(self, driver_id: int) -> Optional[UsersOrm, DriverOrm]:
         with self.session as sess:
-            d = aliased(DriverOrm)
-            u = aliased(UsersOrm)
-            query = select(d.status).select_from(d).join(u, DriverOrm.id == UsersOrm.id).where(DriverOrm.id == driver_id)
+            query = select(DriverOrm.status).select_from(DriverOrm).join(UsersOrm, DriverOrm.id == UsersOrm.id).where(DriverOrm.id == driver_id)
             result = sess.execute(query).first()
             return result
 
     def select_driver_by_fullname(self, driver_fullname: str) -> Optional[UsersOrm, DriverOrm]:
         with self.session as sess:
-            d = aliased(DriverOrm)
-            u = aliased(UsersOrm)
-            query = select(u).select_from(u).join(d, d.id == u.id).where(u.fullname==driver_fullname)
+            query = select(UsersOrm).select_from(UsersOrm).join(DriverOrm, DriverOrm.id == UsersOrm.id).where(UsersOrm.fullname==driver_fullname)
             result = sess.execute(query).scalars().first()
             return result
 

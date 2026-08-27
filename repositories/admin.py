@@ -1,50 +1,26 @@
 from core.setting import engine, DriverStatus
-from models import UsersOrm, DriverOrm
+from models import DriverOrm
 from sqlalchemy.orm import Session
-from sqlalchemy import select, update
+from sqlalchemy import update
 
 class AdminsRepositories:
     def __init__(self):
         self.session = Session(engine)
 
-    def add_driver(self, email: str) -> bool:
+    def add_driver(self, user_id: int) -> None:
         with self.session as sess:
-            user_id_request = select(UsersOrm.id).where(UsersOrm.email == email)
-            user_id = sess.execute(user_id_request).scalar_one_or_none()
-            if user_id is None:
-                return False
-            driver = sess.execute(select(DriverOrm.id).where(DriverOrm.id == user_id)).scalar_one_or_none()
-            if not (driver is None):
-                return False
-            new_driver = DriverOrm(id=user_id)
+            new_driver = DriverOrm(id= user_id)
             sess.add(new_driver)
             sess.commit()
-            return True
 
-    def ban_driver(self, email: str) -> bool:
+    def ban_driver(self, driver_id: int) -> None:
         with self.session as sess:
-            user_id_request = select(UsersOrm.id).where(UsersOrm.email == email)
-            user_id = sess.execute(user_id_request).scalar_one_or_none()
-            if user_id is None:
-                return False
-            driver = sess.execute(select(DriverOrm.id).where(DriverOrm.id == user_id)).scalar_one_or_none()
-            if not (driver is None):
-                return False
-            ban_request = (update(DriverOrm).where(DriverOrm.id == user_id).values(status=DriverStatus.banned))
-            sess.execute(ban_request)
+            request = update(DriverOrm).where(DriverOrm.id == driver_id).values(status= DriverStatus.banned)
+            sess.execute(request)
             sess.commit()
-            return True
 
-    def unban_driver(self, email: str) ->bool:
+    def unban_driver(self, driver_id: int) -> None:
         with self.session as sess:
-            user_id_request = select(UsersOrm.id).where(UsersOrm.email == email)
-            user_id = sess.execute(user_id_request).scalar_one_or_none()
-            if user_id is None:
-                return False
-            driver = sess.execute(select(DriverOrm.id).where(DriverOrm.id == user_id)).scalar_one_or_none()
-            if not (driver is None):
-                return False
-            unban_request = (update(DriverOrm).where(DriverOrm.id == user_id).values(status=DriverStatus.active))
-            sess.execute(unban_request)
+            request = update(DriverOrm).where(DriverOrm.id == driver_id).values(status= DriverStatus.active)
+            sess.execute(request)
             sess.commit()
-            return True
